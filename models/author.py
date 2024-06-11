@@ -1,14 +1,14 @@
 from database.connection import get_db_connection
 
 class Author:
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
 
-    def __init__(self, name):  # Corrected __init_ method
+    def __init__(self, name, id=None):
         self._name = name
-        self._id = None
+        self._id = id
+        if self._id is None:
+            self._create_in_db()
 
+    def _create_in_db(self):
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('INSERT INTO authors (name) VALUES (?)', (self._name,))
@@ -38,8 +38,6 @@ class Author:
         conn.close()
         return articles
 
-    def __repr__(self):
-        return f'<Author {self.name}>'
     def magazines(self):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -51,3 +49,6 @@ class Author:
         magazines = cursor.fetchall()
         conn.close()
         return magazines
+
+    def __repr__(self):
+        return f'<Author {self.name}>'

@@ -1,15 +1,15 @@
 from database.connection import get_db_connection
+
 class Magazine:
-    def __init__(self, id, name, category):
-        self.id = id
-        self.name = name
-        self.category = category
-    
-    def __init__(self, name, category):  # Corrected __init_ method
+
+    def __init__(self, name, category, id=None):
         self._name = name
         self._category = category
-        self._id = None
+        self._id = id
+        if self._id is None:
+            self._create_in_db()
 
+    def _create_in_db(self):
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('INSERT INTO magazines (name, category) VALUES (?, ?)', (self._name, self._category))
@@ -69,9 +69,6 @@ class Magazine:
         conn.close()
         return titles if titles else None
 
-    def __repr__(self):
-        return f'<Magazine {self.name}>'
-    
     def contributing_authors(self):
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -80,8 +77,11 @@ class Magazine:
             JOIN articles ON articles.author_id = authors.id
             WHERE articles.magazine_id = ?
             GROUP BY authors.id
-            HAVING article_count > 2
+            HAVING article_count > 0
         ''', (self.id,))
         authors = cursor.fetchall()
         conn.close()
         return authors if authors else None
+
+    def __repr__(self):
+        return f'<Magazine {self.name}>'
